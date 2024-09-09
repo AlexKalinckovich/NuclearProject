@@ -1,0 +1,62 @@
+[
+{
+  "directory": "E:/NuclearProject/build",
+  "command": "E:\\C++Compiler\\mingw64\\bin\\c++.exe -IE:/NuclearProject/src -IE:/NuclearProject/src/Weapon -IE:/NuclearProject/src/Player -IE:/NuclearProject/src/Ability -IE:/NuclearProject/src/Ability/ShieldAbility -IE:/NuclearProject/src/Ability/RollAbility -IE:/NuclearProject/src/Bullet -IE:/NuclearProject/src/Map -IE:/NuclearProject/src/Enemy -isystem E:/SFML-2.6.1/include -g -std=gnu++17 -o CMakeFiles\\MySFMLProject.dir\\src\\main.cpp.obj -c E:\\NuclearProject\\src\\main.cpp",
+  "file": "E:\\NuclearProject\\src\\main.cpp",
+  "output": "CMakeFiles\\MySFMLProject.dir\\src\\main.cpp.obj"
+},
+{
+  "directory": "E:/NuclearProject/build",
+  "command": "E:\\C++Compiler\\mingw64\\bin\\c++.exe -IE:/NuclearProject/src -IE:/NuclearProject/src/Weapon -IE:/NuclearProject/src/Player -IE:/NuclearProject/src/Ability -IE:/NuclearProject/src/Ability/ShieldAbility -IE:/NuclearProject/src/Ability/RollAbility -IE:/NuclearProject/src/Bullet -IE:/NuclearProject/src/Map -IE:/NuclearProject/src/Enemy -isystem E:/SFML-2.6.1/include -g -std=gnu++17 -o CMakeFiles\\MySFMLProject.dir\\src\\Weapon\\Weapon.cpp.obj -c E:\\NuclearProject\\src\\Weapon\\Weapon.cpp",
+  "file": "E:\\NuclearProject\\src\\Weapon\\Weapon.cpp",
+  "output": "CMakeFiles\\MySFMLProject.dir\\src\\Weapon\\Weapon.cpp.obj"
+},
+{
+  "directory": "E:/NuclearProject/build",
+  "command": "E:\\C++Compiler\\mingw64\\bin\\c++.exe -IE:/NuclearProject/src -IE:/NuclearProject/src/Weapon -IE:/NuclearProject/src/Player -IE:/NuclearProject/src/Ability -IE:/NuclearProject/src/Ability/ShieldAbility -IE:/NuclearProject/src/Ability/RollAbility -IE:/NuclearProject/src/Bullet -IE:/NuclearProject/src/Map -IE:/NuclearProject/src/Enemy -isystem E:/SFML-2.6.1/include -g -std=gnu++17 -o CMakeFiles\\MySFMLProject.dir\\src\\Player\\Player.cpp.obj -c E:\\NuclearProject\\src\\Player\\Player.cpp",
+  "file": "E:\\NuclearProject\\src\\Player\\Player.cpp",
+  "output": "CMakeFiles\\MySFMLProject.dir\\src\\Player\\Player.cpp.obj"
+},
+{
+  "directory": "E:/NuclearProject/build",
+  "command": "E:\\C++Compiler\\mingw64\\bin\\c++.exe -IE:/NuclearProject/src -IE:/NuclearProject/src/Weapon -IE:/NuclearProject/src/Player -IE:/NuclearProject/src/Ability -IE:/NuclearProject/src/Ability/ShieldAbility -IE:/NuclearProject/src/Ability/RollAbility -IE:/NuclearProject/src/Bullet -IE:/NuclearProject/src/Map -IE:/NuclearProject/src/Enemy -isystem E:/SFML-2.6.1/include -g -std=gnu++17 -o CMakeFiles\\MySFMLProject.dir\\src\\Ability\\Ability.cpp.obj -c E:\\NuclearProject\\src\\Ability\\Ability.cpp",
+  "file": "E:\\NuclearProject\\src\\Ability\\Ability.cpp",
+  "output": "CMakeFiles\\MySFMLProject.dir\\src\\Ability\\Ability.cpp.obj"
+},
+{
+  "directory": "E:/NuclearProject/build",
+  "command": "E:\\C++Compiler\\mingw64\\bin\\c++.exe -IE:/NuclearProject/src -IE:/NuclearProject/src/Weapon -IE:/NuclearProject/src/Player -IE:/NuclearProject/src/Ability -IE:/NuclearProject/src/Ability/ShieldAbility -IE:/NuclearProject/src/Ability/RollAbility -IE:/NuclearProject/src/Bullet -IE:/NuclearProject/src/Map -IE:/NuclearProject/src/Enemy -isystem E:/SFML-2.6.1/include -g -std=gnu++17 -o CMakeFiles\\MySFMLProject.dir\\src\\Ability\\ShieldAbility\\ShieldAbility.cpp.obj -c E:\\NuclearProject\\src\\Ability\\ShieldAbility\\ShieldAbility.cpp",
+  "file": "E:\\NuclearProject\\src\\Ability\\ShieldAbility\\ShieldAbility.cpp",
+  "output": "CMakeFiles\\MySFMLProject.dir\\src\\Ability\\ShieldAbility\\ShieldAbility.cpp.obj"
+},
+{
+  "directory": "E:/NuclearProject/build",
+  "command": "E:\\C++Compiler\\mingw64\\bin\\c++.exe -IE:/NuclearProject/src -IE:/NuclearProject/src/Weapon -IE:/NuclearProject/src/Player -IE:/NuclearProject/src/Ability -IE:/NuclearProject/src/Ability/ShieldAbility -IE:/NuclearProject/src/Ability/RollAbility -IE:/NuclearProject/src/Bullet -IE:/NuclearProject/src/Map -IE:/NuclearProject/src/Enemy -isystem E:/SFML-2.6.1/include -g -std=gnu++17 -o CMakeFiles\\MySFMLProject.dir\\src\\Ability\\RollAbility\\RollAbility.cpp.obj -c E:\\NuclearProject\\src\\Ability\\RollAbility\\RollAbility.cpp",
+  "file": "E:\\NuclearProject\\src\\Ability\\RollAbility\\RollAbility.cpp",
+  "output": "CMakeFiles\\MySFMLProject.dir\\src\\Ability\\RollAbility\\RollAbility.cpp.obj"
+},
+{
+  "directory": "E:/NuclearProject/build",
+  "command": "E:\\C++Compiler\\mingw64\\bin\\c++.exe -IE:/NuclearProject/src -IE:/NuclearProject/src/Weapon -IE:/NuclearProject/src/Player -IE:/NuclearProject/src/Ability -IE:/NuclearProject/src/Ability/ShieldAbility -IE:/NuclearProject/src/Ability/RollAbility -IE:/NuclearProject/src/Bullet -IE:/NuclearProject/src/Map -IE:/NuclearProject/src/Enemy -isystem E:/SFML-2.6.1/include -g -std=gnu++17 -o CMakeFiles\\MySFMLProject.dir\\src\\Bullet\\Bullet.cpp.obj -c E:\\NuclearProject\\src\\Bullet\\Bullet.cpp",
+  "file": "E:\\NuclearProject\\src\\Bullet\\Bullet.cpp",
+  "output": "CMakeFiles\\MySFMLProject.dir\\src\\Bullet\\Bullet.cpp.obj"
+},
+{
+  "directory": "E:/NuclearProject/build",
+  "command": "E:\\C++Compiler\\mingw64\\bin\\c++.exe -IE:/NuclearProject/src -IE:/NuclearProject/src/Weapon -IE:/NuclearProject/src/Player -IE:/NuclearProject/src/Ability -IE:/NuclearProject/src/Ability/ShieldAbility -IE:/NuclearProject/src/Ability/RollAbility -IE:/NuclearProject/src/Bullet -IE:/NuclearProject/src/Map -IE:/NuclearProject/src/Enemy -isystem E:/SFML-2.6.1/include -g -std=gnu++17 -o CMakeFiles\\MySFMLProject.dir\\src\\Bullet\\BulletPool.cpp.obj -c E:\\NuclearProject\\src\\Bullet\\BulletPool.cpp",
+  "file": "E:\\NuclearProject\\src\\Bullet\\BulletPool.cpp",
+  "output": "CMakeFiles\\MySFMLProject.dir\\src\\Bullet\\BulletPool.cpp.obj"
+},
+{
+  "directory": "E:/NuclearProject/build",
+  "command": "E:\\C++Compiler\\mingw64\\bin\\c++.exe -IE:/NuclearProject/src -IE:/NuclearProject/src/Weapon -IE:/NuclearProject/src/Player -IE:/NuclearProject/src/Ability -IE:/NuclearProject/src/Ability/ShieldAbility -IE:/NuclearProject/src/Ability/RollAbility -IE:/NuclearProject/src/Bullet -IE:/NuclearProject/src/Map -IE:/NuclearProject/src/Enemy -isystem E:/SFML-2.6.1/include -g -std=gnu++17 -o CMakeFiles\\MySFMLProject.dir\\src\\Map\\Map.cpp.obj -c E:\\NuclearProject\\src\\Map\\Map.cpp",
+  "file": "E:\\NuclearProject\\src\\Map\\Map.cpp",
+  "output": "CMakeFiles\\MySFMLProject.dir\\src\\Map\\Map.cpp.obj"
+},
+{
+  "directory": "E:/NuclearProject/build",
+  "command": "E:\\C++Compiler\\mingw64\\bin\\c++.exe -IE:/NuclearProject/src -IE:/NuclearProject/src/Weapon -IE:/NuclearProject/src/Player -IE:/NuclearProject/src/Ability -IE:/NuclearProject/src/Ability/ShieldAbility -IE:/NuclearProject/src/Ability/RollAbility -IE:/NuclearProject/src/Bullet -IE:/NuclearProject/src/Map -IE:/NuclearProject/src/Enemy -isystem E:/SFML-2.6.1/include -g -std=gnu++17 -o CMakeFiles\\MySFMLProject.dir\\src\\Enemy\\Enemy.cpp.obj -c E:\\NuclearProject\\src\\Enemy\\Enemy.cpp",
+  "file": "E:\\NuclearProject\\src\\Enemy\\Enemy.cpp",
+  "output": "CMakeFiles\\MySFMLProject.dir\\src\\Enemy\\Enemy.cpp.obj"
+}
+]

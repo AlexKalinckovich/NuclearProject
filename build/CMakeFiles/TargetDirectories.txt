@@ -1,0 +1,3 @@
+E:/NuclearProject/build/CMakeFiles/MySFMLProject.dir
+E:/NuclearProject/build/CMakeFiles/edit_cache.dir
+E:/NuclearProject/build/CMakeFiles/rebuild_cache.dir
