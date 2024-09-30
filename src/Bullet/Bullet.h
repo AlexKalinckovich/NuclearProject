@@ -6,13 +6,14 @@
 class Bullet
 {
     public:
-        Bullet(const sf::Vector2f& position,const sf::Vector2f& direction,const sf::Texture& texture,const float angle,const float bulletSize);
-        void update(const float deltaTime);
-        void draw(sf::RenderWindow& window);
-        bool isOffScreen() const;
+        Bullet(const sf::Vector2f& position,const sf::Vector2f& direction,const sf::Texture& texture,float angle,float bulletSize);
+        void update(float deltaTime);
+        void draw(sf::RenderWindow& window) const;
+
+        static bool isOffScreen();
         bool getActive() const;
 
-        void activate(const sf::Vector2f& position, const sf::Vector2f& direction, float angle,const int scaleValue);
+        void activate(const sf::Vector2f& position, const sf::Vector2f& direction, float angle, float scaleValue);
         void deactivate();
 
     private:
@@ -20,7 +21,7 @@ class Bullet
         sf::Sprite sprite;
         sf::Vector2f velocity;
 
-        float speed;
+        float speed{};
         float lifeTime;
         float elapsedTime;
         float bulletSize;

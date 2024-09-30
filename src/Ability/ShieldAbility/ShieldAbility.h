@@ -2,16 +2,17 @@
 #define SHIELD_ABILITY_H
 #include "Ability.h"
 
-class ShieldAbility : public Ability
+class ShieldAbility final : public Ability
 {
 public:
-    ShieldAbility(float cooldown);
+    ShieldAbility(float cooldown,float playerSpeed);
     void activate(Player& player) override;
     void update(Player& player, float deltaTime) override;
 private:
     float shieldCooldown;     // Длительность способности
     float timeSinceActivated; // Время с момента активации
     bool isHalfDuration = false;
+    float playerSpeed;
 };
 
 #endif

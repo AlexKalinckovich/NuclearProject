@@ -1,14 +1,15 @@
 #include "ShieldAbility.h"
 #include <string>
 
-const float NORMAL_SPEED = 0.15f;
-const float SHIELD_SPEED = 0.0000000f;
-const float SHIELD_DURATION = 1.25f;
+constexpr float SHIELD_SPEED = 0.0000000f;
+constexpr float SHIELD_DURATION = 1.25f;
 
-ShieldAbility::ShieldAbility(float cooldown)
+ShieldAbility::ShieldAbility(const float cooldown,const float playerSpeed)
 {
     shieldCooldown = cooldown;
     timeSinceActivated = 0.0f;
+    this->playerSpeed = playerSpeed;
+
 }
 
 void ShieldAbility::activate(Player& player)
@@ -22,14 +23,14 @@ void ShieldAbility::activate(Player& player)
     }
 }
 
-void ShieldAbility::update(Player& player, float deltaTime)
+void ShieldAbility::update(Player& player, const float deltaTime)
 {
     timeSinceActivated += deltaTime;
     if (player.getSpecialActive() && timeSinceActivated >= SHIELD_DURATION)
     {
         timeSinceActivated = 0.0f;
         player.setState(IDLE);
-        player.setSpeed(NORMAL_SPEED);
+        player.setSpeed(playerSpeed);
         player.setNormalBounds();
         player.setSpecialActive(false);
     }

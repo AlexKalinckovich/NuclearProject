@@ -7,11 +7,11 @@
 
 class BulletPool {
 public:
-    BulletPool(size_t poolSize, const sf::Texture& bulletTexture,const float bulletsize);
+    BulletPool(size_t poolSize, const sf::Texture& bulletTexture,float bulletsize);
 
-    Bullet* getBullet();
+    Bullet* getBullet() const;
     void update(float deltaTime);
-    void draw(sf::RenderWindow& window);
+    void draw(sf::RenderWindow& window) const;
 
 private:
     std::vector<std::unique_ptr<Bullet>> bullets;

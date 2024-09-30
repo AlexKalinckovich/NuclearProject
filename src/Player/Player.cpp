@@ -3,13 +3,12 @@
 #include "RollAbility.h"
 #include <functional>
 #include <string>
-#include <cmath>
 
-const int STATES_FRAMES[5]{4,6,2,6,4}; // Количество кадров в анимациях (idle,walking,damage,rolling)
-const float PLAYER_HEIGHT = 3.0f;
-const float FRAME_TIME = 0.1f;
-const float PLAYER_BULLET_HEIGHT = 1.5f;
-
+constexpr int STATES_FRAMES[5]{4,6,2,6,4}; // Количество кадров в анимациях (idle,walking,damage,rolling)
+constexpr float PLAYER_HEIGHT = 3.0f;
+constexpr float FRAME_TIME = 0.1f;
+constexpr float PLAYER_BULLET_HEIGHT = 1.5f;
+constexpr float PLAYER_SPEED = 3.0f;
 const std::unordered_map<sf::Keyboard::Key, sf::Vector2f> keyToDirection{
         {sf::Keyboard::A, {-1, 0}},  // Влево
         {sf::Keyboard::D, {1, 0}},   // Вправо
@@ -18,14 +17,13 @@ const std::unordered_map<sf::Keyboard::Key, sf::Vector2f> keyToDirection{
     };    // Hash-таблица для сопоставления клавиш с направлениями
 
 Player::~Player()
-{
+= default;
 
-}
 
 Player::Player()
 {
     health = 10;
-    speed = 0.15f;
+    speed = PLAYER_SPEED;
 
     initAnimations();
     
@@ -40,35 +38,35 @@ Player::Player()
     playerBounds = sprite.getLocalBounds(); // Берём размеры спрайта
     sprite.setOrigin(playerBounds.width / 2.0f, playerBounds.height / 2.0f); // Устанавливаем точку, откуда будет рассчитываться положение спрайта
 
-    const std::string playerBulletPath = "E:\\NuclearProject\\icons\\Bullets\\PopGunBullet.png";
+    const std::string playerBulletPath = R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Bullets\PopGunBullet.png)";
     weapons.push_back(std::make_unique<Weapon>(playerBulletPath,PLAYER_BULLET_HEIGHT));
     currentWeapon = weapons[0].get();
 
 
-    abilities.push_back(std::make_unique<RollAbility>(1.0f));
-    abilities.push_back(std::make_unique<ShieldAbility>(3.0f));
+    abilities.push_back(std::make_unique<RollAbility>(1.0f,PLAYER_SPEED));
+    abilities.push_back(std::make_unique<ShieldAbility>(3.0f,PLAYER_SPEED));
     currentAbility = abilities[0].get();
 
     sprite.setScale(PLAYER_HEIGHT, PLAYER_HEIGHT);  // Увеличиваем спрайт в два раза
 }
 
 void Player::initAnimations() {
-    const int FRAME_WIDTH = 24;
-    const int FRAME_HEIGHT = 24;
-    const int GAP = 4;
+    constexpr int FRAME_WIDTH = 24;
+    constexpr int FRAME_HEIGHT = 24;
+    constexpr int GAP = 4;
 
-    const int SHIELD_WIDTH = 39;
-    const int SHIELD_HEIGHT = 64;
-    const int SHIELD_GAP = 25;
+    constexpr int SHIELD_WIDTH = 39;
+    constexpr int SHIELD_HEIGHT = 64;
+    constexpr int SHIELD_GAP = 25;
 
-    loadAnimation(IDLE, "E:\\NuclearProject\\icons\\Player\\fishStand.png", STATES_FRAMES[0], FRAME_WIDTH, FRAME_HEIGHT, GAP);
-    loadAnimation(WALKING, "E:\\NuclearProject\\icons\\Player\\fishWalk.png", STATES_FRAMES[1], FRAME_WIDTH, FRAME_HEIGHT, GAP);
-    loadAnimation(HURT, "E:\\NuclearProject\\icons\\Player\\fishDamage.png", STATES_FRAMES[2], FRAME_WIDTH, FRAME_HEIGHT, GAP);
-    loadAnimation(ROLLING, "E:\\NuclearProject\\icons\\Player\\fishRoll.png", STATES_FRAMES[3], FRAME_WIDTH, FRAME_HEIGHT, GAP);
-    loadAnimation(SHIELD, "E:\\NuclearProject\\icons\\Player\\fishShield.png", STATES_FRAMES[4], SHIELD_WIDTH, SHIELD_HEIGHT, SHIELD_GAP);
+    loadAnimation(IDLE, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishStand.png)", STATES_FRAMES[0], FRAME_WIDTH, FRAME_HEIGHT, GAP);
+    loadAnimation(WALKING, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishWalk.png)", STATES_FRAMES[1], FRAME_WIDTH, FRAME_HEIGHT, GAP);
+    loadAnimation(HURT, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishDamage.png)", STATES_FRAMES[2], FRAME_WIDTH, FRAME_HEIGHT, GAP);
+    loadAnimation(ROLLING, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishRoll.png)", STATES_FRAMES[3], FRAME_WIDTH, FRAME_HEIGHT, GAP);
+    loadAnimation(SHIELD, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishShield.png)", STATES_FRAMES[4], SHIELD_WIDTH, SHIELD_HEIGHT, SHIELD_GAP);
 }
 
-void Player::loadAnimation(State state, const std::string& texturePath, int frameCount, int frameWidth, int frameHeight, int gap)
+void Player::loadAnimation(const State state, const std::string& texturePath, const int frameCount, int frameWidth, int frameHeight, const int gap)
 {
     Animation animation;
     sf::Image animIcon;
@@ -96,6 +94,12 @@ Player& Player::getInstance()
     return player;
 }
 
+void Player::smoothMove(const sf::Vector2f& targetPosition, const float deltaTime) {
+    constexpr float smoothingFactor = 4.0f;  // Чем выше, тем плавнее движение
+    const sf::Vector2f currentPos = sprite.getPosition();
+    const sf::Vector2f newPos = currentPos + (targetPosition - currentPos) * smoothingFactor * deltaTime;
+    sprite.setPosition(newPos);
+}
 
 void Player::handleInput(Player& player,const sf::Vector2f& cursorPosition,const float deltaTime)
 {
@@ -120,13 +124,20 @@ void Player::handleInput(Player& player,const sf::Vector2f& cursorPosition,const
     // Перемещаем игрока
     if (direction != sf::Vector2f(0.f, 0.f))
     {
-        sprite.move(speed * direction.x, speed * direction.y);
+        // Рассчитываем следующую позицию игрока
+        const sf::Vector2f nextPos = sprite.getPosition() + (speed * direction);
+        // Проверяем, нет ли стены на этой позиции
+        if (!map.isWallAtPosition(nextPos))
+        {
+            // Если стены нет, перемещаем игрока
+            sprite.move(speed * direction.x, speed * direction.y);
+        }
     }
 
     // Обрабатываем стрельбу
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
     {
-        sf::Vector2f fireDirection = cursorPosition - sprite.getPosition();
+        const sf::Vector2f fireDirection = cursorPosition - sprite.getPosition();
         currentWeapon->fire(sprite.getPosition(), fireDirection,signRotationValue);
     }
 
@@ -159,14 +170,13 @@ void Player::switchAbility()
 void Player::update(const float deltaTime, const sf::Vector2f& cursorPosition)
 {
     elapsedTime += deltaTime;
-    const sf::Vector2f& spritePosition = sprite.getPosition();
 
     // Оптимизация расчета направления взгляда
-    if ((cursorPosition.x < spritePosition.x && signRotationValue != 1) ||
-        (cursorPosition.x >= spritePosition.x && signRotationValue != -1))
+    if (const sf::Vector2f& spritePosition = sprite.getPosition(); (cursorPosition.x < spritePosition.x && signRotationValue != 1) ||
+                                                                   (cursorPosition.x >= spritePosition.x && signRotationValue != -1))
     {
-        signRotationValue = (cursorPosition.x < spritePosition.x) ? 1 : -1;
-        float scale = (signRotationValue == 1) ? -PLAYER_HEIGHT : PLAYER_HEIGHT;
+        signRotationValue = cursorPosition.x < spritePosition.x ? 1 : -1;
+        const float scale = signRotationValue == 1 ? -PLAYER_HEIGHT : PLAYER_HEIGHT;
         sprite.setScale(scale, PLAYER_HEIGHT);
 
         if (signRotationValue == 1)
@@ -193,20 +203,20 @@ void Player::update(const float deltaTime, const sf::Vector2f& cursorPosition)
         elapsedTime = 0.0f;
 
         // Получаем текущее состояние анимации
-        const Animation& animState = animations[state];
-        sprite.setTextureRect(animState.frames[currentFrame]);
+        const auto&[texture, frames, frameCount] = animations[state];
+        sprite.setTextureRect(frames[currentFrame]);
 
         // Обновляем кадр
-        if (state == SHIELD) 
+        if (state == SHIELD)
         {
             // Если состояние "щит", то кадры проходят только вперед
-            if (currentFrame < animState.frameCount - 1)
+            if (currentFrame < frameCount - 1)
                 currentFrame++;
-        } 
-        else 
+        }
+        else
         {
             // Для остальных состояний кадры зацикливаются
-            currentFrame = (currentFrame + 1) % animState.frameCount;
+            currentFrame = (currentFrame + 1) % frameCount;
         }
 
         // Если требуется зеркалирование, изменить origin спрайта
@@ -218,23 +228,22 @@ void Player::update(const float deltaTime, const sf::Vector2f& cursorPosition)
     }
 }
 
-void Player::draw(sf::RenderWindow& window)
-{
+void Player::draw(sf::RenderWindow& window) const {
     window.draw(sprite);
     currentWeapon->draw(window);
 }
 
-void Player::setHealth(int hp)
+void Player::setHealth(const int hp)
 {
     health = hp;
 }
 
-int Player::getHealth() const
+unsigned Player::getHealth() const
 {
     return health;
 }
 
-void Player::setSpeed(float spd)
+void Player::setSpeed(const float spd)
 {
     speed = spd;
 }
@@ -244,7 +253,7 @@ float Player::getSpeed() const
     return speed;
 }
 
-void Player::setState(State state)
+void Player::setState(const State state)
 {
     this->state = state;
 }
@@ -254,7 +263,7 @@ State Player::getState() const
     return state;
 }
 
-void Player::setSpecialActive(bool isActive)
+void Player::setSpecialActive(const bool isActive)
 {
     isSpecialActive = isActive;
 }
@@ -279,7 +288,11 @@ void Player::setPosition(const sf::Vector2f& position)
     sprite.setPosition(position);
 }
 
-int Player::getScaleValue() const
+float Player::getScaleValue() const
 {
     return signRotationValue;
+}
+void Player::setMap(const Map &map)
+{
+    this->map = map;
 }

@@ -1,18 +1,18 @@
 #include "Enemy/Enemy.h"
 #include <cmath>
 #include <random>
-#include <iostream>
 
-const int FRAME_COUNT = 6;
-const float ENEMY_HEIGHT = 3.0f;
-const float ENEMY_BULLET_HEIGHT = 2.5f;
+
+constexpr int FRAME_COUNT = 6;
+constexpr float ENEMY_HEIGHT = 3.0f;
+constexpr float ENEMY_BULLET_HEIGHT = 2.5f;
 
 // Конструктор Enemy
 Enemy::Enemy(const sf::Vector2f& position)
     : detectionRadius(200.0f), moveTimer(0.0f), active(true) 
 {
     // Загружаем текстуру
-    const std::string& texturePath = "E:\\NuclearProject\\icons\\Enemy\\enemy.png";
+    const std::string& texturePath = R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Enemy\enemy.png)";
     enemyTexture.loadFromFile(texturePath);
     // Загружаем анимацию
     loadAnimation();
@@ -31,7 +31,7 @@ Enemy::Enemy(const sf::Vector2f& position)
     sprite.setOrigin(bounds.width,bounds.height);
 
     // Инициализация оружия
-    const std::string enemyBulletPath = "E:\\NuclearProject\\icons\\Bullets\\EnemyBullet.png";
+    const std::string enemyBulletPath = R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Bullets\EnemyBullet.png)";
     weapon = std::make_unique<Weapon>(enemyBulletPath,ENEMY_BULLET_HEIGHT);
 
     velocity = sf::Vector2f(0.0f, 0.0f);                                                               
@@ -40,19 +40,16 @@ Enemy::Enemy(const sf::Vector2f& position)
 
 void Enemy::loadAnimation()
 {
-    const int HEIGHT = 17;
-    const int WIDTH =  17;
-    const int GAP = 8;
-
-
-    for(int i = 0;i < FRAME_COUNT;i++)
-    {
-        animationFrames.push_back(sf::IntRect(i * (WIDTH + GAP), 0, WIDTH, HEIGHT));
+    for(int i = 0;i < FRAME_COUNT;i++) {
+        constexpr int GAP = 8;
+        constexpr int WIDTH =  17;
+        constexpr int HEIGHT = 17;
+        animationFrames.emplace_back(i * (WIDTH + GAP), 0, WIDTH, HEIGHT);
     }
 }
 
 // Обновление состояния Enemy
-void Enemy::update(const sf::Vector2f& playerPosition, const float deltaTime, const int scaleValue)
+void Enemy::update(const sf::Vector2f &playerPosition, const float deltaTime)
 {
     elapsedTime += deltaTime;
     const sf::Vector2f& position = sprite.getPosition();
@@ -62,7 +59,7 @@ void Enemy::update(const sf::Vector2f& playerPosition, const float deltaTime, co
         (playerPosition.x >= position.x && signRotationValue != -1))
     {
         signRotationValue = (playerPosition.x < position.x) ? 1 : -1;
-        float scale = (signRotationValue == 1) ? -ENEMY_HEIGHT : ENEMY_HEIGHT;
+        const float scale = signRotationValue == 1 ? -ENEMY_HEIGHT : ENEMY_HEIGHT;
         sprite.setScale(scale, ENEMY_HEIGHT);
 
         if (signRotationValue == 1)
@@ -100,8 +97,7 @@ void Enemy::update(const sf::Vector2f& playerPosition, const float deltaTime, co
 
 
 // Отрисовка Enemy
-void Enemy::draw(sf::RenderWindow& window)
-{
+void Enemy::draw(sf::RenderWindow& window) const {
     window.draw(sprite);
     weapon->draw(window);
 }
@@ -109,8 +105,8 @@ void Enemy::draw(sf::RenderWindow& window)
 // Проверка, находится ли игрок в радиусе обнаружения
 bool Enemy::isPlayerInDetectionRange(const sf::Vector2f& playerPosition) const
 {
-    float distance = std::sqrt(std::pow(playerPosition.x - sprite.getPosition().x, 2) +
-                               std::pow(playerPosition.y - sprite.getPosition().y, 2));
+    const auto distance = static_cast<float>(std::sqrt(std::pow(playerPosition.x - sprite.getPosition().x, 2) +
+                                     std::pow(playerPosition.y - sprite.getPosition().y, 2)));
     return distance <= detectionRadius;
 }
 
@@ -123,13 +119,13 @@ void Enemy::chasePlayer(const sf::Vector2f& playerPosition, float deltaTime)
 }
 
 // Генерация случайного направления движения
-void Enemy::randomMovement(float deltaTime) {
+void Enemy::randomMovement(const float deltaTime) {
     moveTimer += deltaTime;
     if (moveTimer >= 1.0f)
     {
         std::random_device rd;
         std::mt19937 rng(rd());
-        std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+        std::uniform_real_distribution dist(-1.0f, 1.0f);
 
         velocity.x = dist(rng) * 50.0f;
         velocity.y = dist(rng) * 50.0f;
@@ -139,7 +135,7 @@ void Enemy::randomMovement(float deltaTime) {
 }
 
 // Установка радиуса обнаружения
-void Enemy::setDetectionRadius(float radius)
+void Enemy::setDetectionRadius(const float radius)
 {
     detectionRadius = radius;
 }

@@ -1,6 +1,6 @@
 #include "BulletPool.h"
 
-BulletPool::BulletPool(size_t poolSize, const sf::Texture& bulletTexture,const float bulletSize)
+BulletPool::BulletPool(const size_t poolSize, const sf::Texture& bulletTexture,const float bulletSize)
 {
     bullets.reserve(poolSize);
     for (size_t i = 0; i < poolSize; i++)
@@ -9,7 +9,7 @@ BulletPool::BulletPool(size_t poolSize, const sf::Texture& bulletTexture,const f
     }
 }
 
-Bullet* BulletPool::getBullet()
+Bullet* BulletPool::getBullet() const
 {
     for (auto& bullet : bullets)
     {
@@ -21,9 +21,9 @@ Bullet* BulletPool::getBullet()
     return nullptr;  // Все пули заняты
 }
 
-void BulletPool::update(float deltaTime)
+void BulletPool::update(const float deltaTime)
 {
-    for (auto& bullet : bullets)
+    for (const auto& bullet : bullets)
     {
         if (bullet->getActive())
         {
@@ -32,9 +32,9 @@ void BulletPool::update(float deltaTime)
     }
 }
 
-void BulletPool::draw(sf::RenderWindow& window)
+void BulletPool::draw(sf::RenderWindow& window) const
 {
-    for (auto& bullet : bullets)
+    for (const auto& bullet : bullets)
     {
         if (bullet->getActive())
         {

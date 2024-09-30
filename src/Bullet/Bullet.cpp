@@ -2,11 +2,11 @@
 #include <SFML/Graphics.hpp>
 #include <cmath>
 
-const float BULLET_SPEED = 500.0f;
-const float BULLET_LIFETIME = 2.0f;
+constexpr float BULLET_SPEED = 500.0f;
+constexpr float BULLET_LIFETIME = 2.0f;
 
 Bullet::Bullet(const sf::Vector2f& position, const sf::Vector2f& direction, const sf::Texture& texture, const float angle,const float bulletSize)
-    : isActive(false), elapsedTime(0.0f), lifeTime(BULLET_LIFETIME)
+    : lifeTime(BULLET_LIFETIME), elapsedTime(0.0f), isActive(false)
 {
 
     sprite.setTexture(texture);
@@ -14,16 +14,16 @@ Bullet::Bullet(const sf::Vector2f& position, const sf::Vector2f& direction, cons
     sprite.setScale(bulletSize, bulletSize);
     this->bulletSize = bulletSize;
 
-    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+    const float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
     velocity = BULLET_SPEED * direction / length;
 
     sprite.setRotation(angle);
 }
 
-void Bullet::activate(const sf::Vector2f& position, const sf::Vector2f& direction, const float angle,const int scaleValue)
+void Bullet::activate(const sf::Vector2f& position, const sf::Vector2f& direction, const float angle,const float scaleValue)
 {
     sprite.setPosition(position);
-    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+    const float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
     velocity = BULLET_SPEED * direction / length;
     sprite.setRotation(angle);
     if(scaleValue * sprite.getScale().x < 0)
@@ -55,7 +55,7 @@ void Bullet::update(const float deltaTime)
     }
 }
 
-void Bullet::draw(sf::RenderWindow& window)
+void Bullet::draw(sf::RenderWindow& window) const
 {
     if (isActive)
     {
@@ -68,7 +68,7 @@ bool Bullet::getActive() const
     return isActive;
 }
 
-bool Bullet::isOffScreen() const
+bool Bullet::isOffScreen()
 {
     return false;
 }

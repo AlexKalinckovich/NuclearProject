@@ -1,13 +1,13 @@
 #include "RollAbility.h"
 
-const float ROLLING_SPEED = 0.35f;
-const float NORMAL_SPEED = 0.15f;
-const float ROLLING_DURATION = 0.4f;
+constexpr float ROLLING_DURATION = 0.4f;
 
-RollAbility::RollAbility(float cooldown)
+RollAbility::RollAbility(const float cooldown,const float playerSpeed)
 {
     rollCooldown = cooldown;
     timeSinceLastRoll = cooldown + 1.0f;
+    this->playerSpeed = playerSpeed;
+    rollingSpeed = playerSpeed * 2;
 }
 
 void RollAbility::activate(Player& player)
@@ -15,20 +15,20 @@ void RollAbility::activate(Player& player)
     if (timeSinceLastRoll >= rollCooldown)
     {
         player.setState(ROLLING);
-        player.setSpeed(ROLLING_SPEED);
+        player.setSpeed(rollingSpeed);
         player.setSpecialActive(true);
         timeSinceLastRoll = 0.0f;
     }
 }
 
-void RollAbility::update(Player& player, float deltaTime)
+void RollAbility::update(Player& player, const float deltaTime)
 {
     timeSinceLastRoll += deltaTime;
 
     if (player.getSpecialActive() && timeSinceLastRoll >= ROLLING_DURATION)
     {
         player.setState(IDLE);
-        player.setSpeed(NORMAL_SPEED);
+        player.setSpeed(playerSpeed);
         player.setSpecialActive(false);
     }
 }

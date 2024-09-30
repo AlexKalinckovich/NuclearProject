@@ -7,20 +7,20 @@
 
 class Enemy {
 public:
-    Enemy(const sf::Vector2f& position);
+    explicit Enemy(const sf::Vector2f& position);
 
     // Основные методы
-    void update(const sf::Vector2f& playerPosition, const float deltaTime,const int scaleValue);  // Обновление состояния противника
-    void draw(sf::RenderWindow& window);  // Отрисовка противника
+    void update(const sf::Vector2f& playerPosition, float deltaTime);  // Обновление состояния противника
+    void draw(sf::RenderWindow& window) const;  // Отрисовка противника
 
     // Проверка, попадает ли игрок в радиус обнаружения
     bool isPlayerInDetectionRange(const sf::Vector2f& playerPosition) const;
 
     // Генерация случайного направления движения
-    void generateRandomMovement(const float deltaTime);
+    void generateRandomMovement(float deltaTime);
 
     // Установка радиуса обнаружения
-    void setDetectionRadius(const float radius);
+    void setDetectionRadius(float radius);
 
     // Проверка на активность противника
     bool isActive() const;
@@ -32,11 +32,9 @@ private:
     std::unique_ptr<Weapon> weapon;  // Оружие противника
     sf::Vector2f velocity;  // Скорость и направление движения
 
-
-
     std::vector<sf::IntRect> animationFrames;  // Кадры анимации
     unsigned currentFrame;  // Текущий кадр анимации
-    float elapsedTime;  // Время с последнего обновления анимации
+    float elapsedTime{};  // Время с последнего обновления анимации
     const float frameTime = 0.1f;  // Интервал времени между кадрами
 
     float detectionRadius;  // Радиус обнаружения игрока
@@ -45,8 +43,8 @@ private:
 
     float signRotationValue = 1;
 
-    void chasePlayer(const sf::Vector2f& playerPosition, const float deltaTime);  // Движение к игроку
-    void randomMovement(const float deltaTime);  // Хаотичное движение
+    void chasePlayer(const sf::Vector2f& playerPosition, float deltaTime);  // Движение к игроку
+    void randomMovement(float deltaTime);  // Хаотичное движение
     void loadAnimation();
 };
 

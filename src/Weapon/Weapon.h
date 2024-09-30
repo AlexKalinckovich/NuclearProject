@@ -9,14 +9,14 @@ class BulletPool;
 class Weapon 
 {
 public:
-    Weapon(const std::string& bulletTexturePath,const float bulletSize);
-    void update(const sf::Vector2f& playerPosition,const sf::Vector2f& cursorPosition,const float deltaTime,const int scaleValue);
-    void draw(sf::RenderWindow& window);
-    void fire(const sf::Vector2f& playerPosition, const sf::Vector2f& direction,const int scaleValue);
+    Weapon(const std::string& bulletTexturePath, float bulletSize);
+    void update(const sf::Vector2f &playerPosition, const sf::Vector2f &cursorPosition, float deltaTime, float scaleValue);
+    void draw(sf::RenderWindow& window) const;
+    void fire(const sf::Vector2f &playerPosition, const sf::Vector2f &direction, float scaleValue);
     void setTexture(const std::string& bulletTexturePath);
-    void setDamage(const int damage);
-    void setWeaponReloadSpeed(const int reloadSpeed);
-    void setTimeSinceLastShot(const float time);
+    void setDamage(int damage);
+    void setWeaponReloadSpeed(int reloadSpeed);
+    void setTimeSinceLastShot(float time);
     void setPosition(const sf::Vector2f& position);
     void mirroredLeft();
     void mirroredRight();
@@ -29,12 +29,12 @@ private:
     int weaponDamage;
     float weaponReloadSpeed;
     float timeSinceLastShot;
-    float animationAngle;
+    float animationAngle{};
 
     const sf::FloatRect& localBounds = weaponSprite.getLocalBounds();
-    float fireAngle;
-    float fireXCoordinate;
-    float fireYCoordinate; 
+    float fireAngle{};
+    float fireXCoordinate{};
+    float fireYCoordinate{};
 
     std::unique_ptr<BulletPool> bulletPool;
 
