@@ -35,3 +35,7 @@ void ShieldAbility::update(Player& player, const float deltaTime)
         player.setSpecialActive(false);
     }
 }
+void ShieldAbility::setTimeSinceActivated(const float time)
+{
+    timeSinceActivated = time;
+}

@@ -7,15 +7,15 @@
 constexpr float WEAPON_HEIGHT = 3.0f;
 constexpr float PI = 3.14159265f;
 constexpr int PI_ANGLE = 180;
-
-Weapon::Weapon(const std::string& bulletTexturePath,const float bulletSize)
+constexpr int BULLET_COUNT = 12;
+Weapon::Weapon(const std::string& bulletTexturePath,const float bulletSize,BulletOwner owner)
     : weaponDamage(1),
       weaponReloadSpeed(0.25f),
       timeSinceLastShot(0.0f),
       bulletPool(nullptr)
 {
     setTexture(bulletTexturePath);
-    bulletPool = std::make_unique<BulletPool>(10, bulletTexture,bulletSize);  // Инициализация bulletPool после загрузки текстуры
+    bulletPool = std::make_unique<BulletPool>(BULLET_COUNT, bulletTexture,bulletSize,owner);  // Инициализация bulletPool после загрузки текстуры
 }
 
 
@@ -34,6 +34,10 @@ void Weapon::setTexture(const std::string& bulletTexturePath)
     bulletTexture.loadFromFile(bulletTexturePath);
 }
 
+BulletPool *Weapon::getBulletPool() const
+{
+    return bulletPool.get();
+}
 
 
 void Weapon::update(const sf::Vector2f& playerPosition, const sf::Vector2f& cursorPosition, const float deltaTime, const float scaleValue)

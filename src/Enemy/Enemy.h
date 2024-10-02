@@ -1,51 +1,74 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
+#include <array>
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <Player.h>
+
 #include "Weapon.h"  // Подключаем оружие
+#include "Map.h"
+class Map;
+class Weapon;
+
+enum enemyState { ENEMY_WALKING = 0, ENEMY_HURT = 1, ENEMY_DEAD = 2};
+
+struct enemyAnimation
+{
+    sf::Texture texture;
+    std::vector<sf::IntRect> frames;
+    int frameCount;
+};
 
 class Enemy {
 public:
     explicit Enemy(const sf::Vector2f& position);
 
-    // Основные методы
-    void update(const sf::Vector2f& playerPosition, float deltaTime);  // Обновление состояния противника
+    void update(const Player &player, float deltaTime);  // Обновление состояния противника
+    void activeUpdate(const sf::Vector2f &playerPosition, float deltaTime, bool isPlayerAlive);
+
     void draw(sf::RenderWindow& window) const;  // Отрисовка противника
 
-    // Проверка, попадает ли игрок в радиус обнаружения
-    bool isPlayerInDetectionRange(const sf::Vector2f& playerPosition) const;
-
-    // Генерация случайного направления движения
-    void generateRandomMovement(float deltaTime);
-
-    // Установка радиуса обнаружения
+    void takeDamage(Bullet* bullet);
+    bool isActive() const;
     void setDetectionRadius(float radius);
 
-    // Проверка на активность противника
-    bool isActive() const;
+    Weapon* getWeapon() const;
+    sf::Sprite getSprite() const;
 
 private:
-    sf::Sprite sprite;  // Спрайт противника
-    sf::Texture enemyTexture;
-    sf::Sprite weaponSprite;  // Спрайт оружия
-    std::unique_ptr<Weapon> weapon;  // Оружие противника
-    sf::Vector2f velocity;  // Скорость и направление движения
+    sf::Sprite sprite;
+    std::unique_ptr<Weapon> weapon;
+    std::array<enemyAnimation, 3> animations;
+    sf::Vector2f velocity;
 
-    std::vector<sf::IntRect> animationFrames;  // Кадры анимации
-    unsigned currentFrame;  // Текущий кадр анимации
-    float elapsedTime{};  // Время с последнего обновления анимации
-    const float frameTime = 0.1f;  // Интервал времени между кадрами
-
-    float detectionRadius;  // Радиус обнаружения игрока
-    float moveTimer;  // Таймер для случайного движения
-    bool active;  // Флаг активности противника
-
+    unsigned currentFrame = 0;
+    float elapsedTime = 0.0f;
+    float damageAnimationTime = 0.0f;
+    const float frameTime = 0.1f;
+    float detectionRadius = 300.0f;
+    float moveTimer = 0.0f;
     float signRotationValue = 1;
+    bool active = true;
 
-    void chasePlayer(const sf::Vector2f& playerPosition, float deltaTime);  // Движение к игроку
-    void randomMovement(float deltaTime);  // Хаотичное движение
-    void loadAnimation();
+    int health = 10;
+    enemyState state = ENEMY_WALKING;
+    enemyState previousState = ENEMY_WALKING;
+
+    Map* map = nullptr;
+
+    // Логические блоки
+    void handleRotation(const sf::Vector2f &playerPosition,const sf::Vector2f& position);
+    void handleState();
+    void handleEnemyDamage(float deltaTime);
+    void handlePlayerMovement(const sf::Vector2f &playerPosition, const sf::Vector2f &position, float deltaTime, bool isPlayerAlive);
+    // Вспомогательные функции
+    void spriteInit(const sf::Vector2f& position);
+    void loadAnimation(enemyState state, const std::string& texturePath, int frameCount, int frameWidth, int frameHeight, int gap);
+    void chasePlayer(const sf::Vector2f& playerPosition);
+    void randomMovement(float deltaTime);
+    bool isPlayerInDetectionRange(const sf::Vector2f& playerPosition) const;
+    void deactivateBullets() const;
 };
 
 #endif // ENEMY_H

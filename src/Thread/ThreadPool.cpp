@@ -6,36 +6,26 @@ ThreadPool::ThreadPool(const size_t threads) {
             while (true) {
                 std::function<void()> task;
                 {
-                    std::unique_lock lock(queueMutex);
-                    condition.wait(lock, [this] { return stop || !tasks.empty(); });
-                    if (stop && tasks.empty()) return;
-                    task = std::move(tasks.front());
+                    std::unique_lock lock(queueMutex); // Блокируем очередь задач
+                    condition.wait(lock, [this] { return stop || !tasks.empty(); }); // Ждем задачи или завершение работы
+                    if (stop && tasks.empty()) return; // Если поток завершен и задач больше нет
+                    task = std::move(tasks.front());  // Извлекаем задачу
                     tasks.pop();
                 }
-                task();
+                task(); // Выполняем задачу
             }
         });
     }
 }
-
 
 ThreadPool::~ThreadPool() {
     {
         std::unique_lock lock(queueMutex);
         stop = true;
     }
-    condition.notify_all();
+    condition.notify_all(); // Уведомляем все потоки о завершении
     for (std::thread &worker : workers) {
-        worker.join();
+        worker.join(); // Ожидаем завершение всех потоков
     }
-}
-
-template<class F>
-void ThreadPool::enqueue(F&& task) {
-    {
-        std::unique_lock lock(queueMutex);
-        tasks.emplace(std::forward<F>(task));
-    }
-    condition.notify_one();
 }
 

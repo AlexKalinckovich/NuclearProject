@@ -28,6 +28,9 @@ add_executable(MySFMLProject
         src/Map/Map.cpp
         src/Enemy/Enemy.cpp
         src/main.cpp
+        src/Thread/ThreadPool.cpp
+        src/Thread/ThreadPool.cpp
+        src/Game/Game.cpp
 )
 
 # Добавление include директорий

@@ -1,6 +1,8 @@
 #include "Map.h"
 #include <random>
 #include <algorithm>
+#include <Enemy.h>
+#include <memory>
 #include <queue>
 
 constexpr int MAX_NEIGHBOR_WALLS = 5;
@@ -26,7 +28,29 @@ void Map::generate() {
     randomizeMap();            // Первичное случайное заполнение
     smoothMap();              // Несколько итераций сглаживания
     addBorders();
+    generateLabyrinth(1,1);
+    playerStartPosition = findPlayerStartPosition();
 }
+
+void Map::generateLabyrinth(const int x, const int y)
+{
+    map[y * width + x] = 0;  // Текущая клетка становится полом
+
+    std::vector<std::pair<int, int>> directions = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};  // Вверх, вниз, влево, вправо
+    std::shuffle(directions.begin(), directions.end(), std::mt19937(std::random_device()()));  // Перемешиваем направления
+
+    for (const auto& [dx, dy] : directions) {
+        const int nx = x + dx * 2;
+        const int ny = y + dy * 2;
+
+        // Проверяем, что новые координаты находятся в пределах карты и не посещены (1 = стена)
+        if (nx >= 0 && nx < width && ny >= 0 && ny < height && map[ny * width + nx] == 1) {
+            map[(y + dy) * width + (x + dx)] = 0;  // Промежуточная клетка между текущей и следующей становится полом
+            generateLabyrinth(nx, ny);  // Рекурсивно вызываем генерацию для следующей клетки
+        }
+    }
+}
+
 
 void Map::initialMapWithWalls()
 {
@@ -105,6 +129,40 @@ void Map::addBorders()
 }
 
 
+std::vector<std::vector<bool>> Map::findAccessibleAreas(const sf::Vector2f& start) const {
+    std::vector visited(height, std::vector(width, false));
+    std::queue<std::pair<int, int>> queue;
+    const int startX = static_cast<int>(start.x / tileSize);
+    const int startY = static_cast<int>(start.y / tileSize);
+
+    // Начинаем BFS с позиции игрока (или любой другой стартовой точки)
+    queue.emplace(startX, startY);
+    visited[startY][startX] = true;
+
+    // Направления для перемещения (вверх, вниз, влево, вправо)
+    const std::vector<std::pair<int, int>> directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+
+    while (!queue.empty()) {
+        const auto [x, y] = queue.front();
+        queue.pop();
+
+        for (const auto& [dx, dy] : directions) {
+            const int nx = x + dx;
+            const int ny = y + dy;
+
+            if (nx >= 0 && ny >= 0 && nx < width && ny < height && !visited[ny][nx] && map[ny * width + nx] == 0) {
+                visited[ny][nx] = true;
+                queue.emplace(nx, ny);
+            }
+        }
+    }
+
+    return visited;
+}
+
+
+
+
 void Map::draw(sf::RenderWindow& window, const sf::View& view)
 {
     const sf::Vector2f& viewCenter = view.getCenter();
@@ -142,13 +200,6 @@ sf::Vector2f Map::findPlayerStartPosition() const {
     return {(static_cast<float>(x) * tileSize), (static_cast<float>(y) * tileSize)};
 }
 
-Map& Map::getInstance()
-{
-    static Map map;
-    return map;
-}
-
-
 bool Map::isWallAtPosition(const sf::Vector2f& position) const {
     const int tileX = static_cast<int>(position.x / tileSize);
     const int tileY = static_cast<int>(position.y / tileSize);
@@ -170,24 +221,28 @@ bool Map::isWall(const int x, const int y) const
     return map[y * width + x] == 1;
 }
 
-
-std::vector<std::unique_ptr<Enemy>> Map::spawnEnemies(const int count) const
+int Map::getWidth() const
 {
-    std::vector<std::unique_ptr<Enemy>> enemies;
-    std::random_device rd;
-    std::mt19937 rng(rd());
-
-    for (int i = 0; i < count; ++i) {
-        sf::Vector2f spawnPosition;
-        do {
-            const unsigned x = rng() % width;
-            const unsigned y = rng() % height;
-            spawnPosition = sf::Vector2f(x * tileSize, y * tileSize);
-        } while (isWall(spawnPosition.x / tileSize, spawnPosition.y / tileSize));
-
-        enemies.emplace_back(std::make_unique<Enemy>(spawnPosition));
-    }
-
-    return enemies;
+    return width;
 }
 
+int Map::getHeight() const
+{
+    return height;
+}
+
+float Map::getTileSize() const
+{
+    return tileSize;
+}
+
+
+const std::vector<int>& Map::getMap() const
+{
+    return map;  // Возвращаем ссылку на карту
+}
+
+sf::Vector2f Map::getPlayerStartPosition() const
+{
+    return playerStartPosition;
+}

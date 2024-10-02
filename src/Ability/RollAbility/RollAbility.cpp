@@ -32,3 +32,7 @@ void RollAbility::update(Player& player, const float deltaTime)
         player.setSpecialActive(false);
     }
 }
+void RollAbility::setTimeSinceActivated(const float time)
+{
+    timeSinceLastRoll = time;
+}

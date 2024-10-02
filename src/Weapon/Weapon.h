@@ -3,13 +3,13 @@
 
 #include <SFML/Graphics.hpp>
 #include "Bullet/BulletPool.h"
-
+class Bullet;
 class BulletPool;
 
 class Weapon 
 {
 public:
-    Weapon(const std::string& bulletTexturePath, float bulletSize);
+    Weapon(const std::string& bulletTexturePath, float bulletSize,BulletOwner owner);
     void update(const sf::Vector2f &playerPosition, const sf::Vector2f &cursorPosition, float deltaTime, float scaleValue);
     void draw(sf::RenderWindow& window) const;
     void fire(const sf::Vector2f &playerPosition, const sf::Vector2f &direction, float scaleValue);
@@ -24,6 +24,7 @@ public:
     int getWeaponDamage() const;
     float getWeaponReloadSpeed() const;
     float getTimeSinceLastShot() const;
+    BulletPool* getBulletPool() const;
 private:
 
     int weaponDamage;

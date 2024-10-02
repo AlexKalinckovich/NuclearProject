@@ -12,7 +12,7 @@
 
 class Ability;
 // Перечисление состояний игрока
-enum State { IDLE = 0, WALKING = 1, HURT = 2, ROLLING = 3, SHIELD = 4 };
+enum State { IDLE = 0, WALKING = 1, HURT = 2, ROLLING = 3, SHIELD = 4,DEAD = 5};
 
 struct Animation
 {
@@ -28,8 +28,13 @@ public:
 
     // Основные методы
     void update(float deltaTime, const sf::Vector2f& cursorPosition);
+
+    void takeDamage(Bullet* bullet);
+
     void draw(sf::RenderWindow& window) const;
     void handleInput(Player& player,const sf::Vector2f& cursorPosition, float deltaTime);
+
+
     // Установка/получение здоровья и скорости
     void setHealth(int health);
 
@@ -50,14 +55,19 @@ public:
     void setPosition(const sf::Vector2f& position);
 
     float getScaleValue() const;
-    void setMap(const Map& map);
+    Weapon* getWeapon() const;
+    sf::Sprite getSprite() const;
+    int getMaxHealth() const;
+    bool isAlive() const;
 private:
     Player();
     ~Player();
 
 
     bool isSpecialActive = false;
-    Map map;
+    Map* map;
+    bool abilitySwitching = false;
+    bool active = true;
     Player(const Player&);
     Player& operator=(const Player&) const;
 
@@ -67,15 +77,15 @@ private:
 
     unsigned currentFrame = 0;
     float elapsedTime = 0.0f;
+    float damageAnimationTime = 0.0f;
 
     float signRotationValue = 1.0f;
 
     State state = IDLE;
     State previousState = IDLE;
 
-    std::function<void()> stateChanger[5];
-
-    unsigned health;
+    int health;
+    int maxHealth;
     float speed;
 
     std::vector<std::unique_ptr<Weapon>> weapons;
@@ -86,13 +96,22 @@ private:
     unsigned currentAbilityIndex = 0;
 
     // Массив анимаций вместо map
-    std::array<Animation, 5> animations;
+    std::array<Animation, 6> animations;
 
     void changeAbility();
     void loadAnimation(State state, const std::string& texturePath, int frameCount, int frameWidth, int frameHeight, int gap);
     void initAnimations();
     void switchAbility();
-    void smoothMove(const sf::Vector2f& targetPosition, float deltaTime);
+
+    void processMovement();
+    void processShooting(const sf::Vector2f &cursorPosition,float deltaTime) const;
+    void processAbilities(Player &player, float deltaTime);
+    void animationUpdate(const sf::Vector2f &cursorPosition);
+    void handleRotation(const sf::Vector2f &cursorPosition);
+
+    void handleDamage(float deltaTime);
+
+    void handleState();
 };
 
 #endif // PLAYER_H

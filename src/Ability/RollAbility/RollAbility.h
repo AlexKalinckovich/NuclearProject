@@ -7,6 +7,7 @@ class RollAbility final : public Ability
         explicit RollAbility(float cooldown,float playerSpeed);
         void activate(Player& player) override;
         void update(Player& player, float deltaTime) override;
+        void setTimeSinceActivated(float time) override;
     private:
         float rollCooldown;       // Время перезарядки для переката
         float timeSinceLastRoll;  // Время с момента последнего использования

@@ -4,11 +4,12 @@
 #include <functional>
 #include <string>
 
-constexpr int STATES_FRAMES[5]{4,6,2,6,4}; // Количество кадров в анимациях (idle,walking,damage,rolling)
+constexpr int STATES_FRAMES[6]{4,6,4,6,4,6}; // Количество кадров в анимациях (idle,walking,damage,rolling)
 constexpr float PLAYER_HEIGHT = 3.0f;
 constexpr float FRAME_TIME = 0.1f;
 constexpr float PLAYER_BULLET_HEIGHT = 1.5f;
 constexpr float PLAYER_SPEED = 3.0f;
+constexpr float DAMAGE_DURATION = 0.5f;
 const std::unordered_map<sf::Keyboard::Key, sf::Vector2f> keyToDirection{
         {sf::Keyboard::A, {-1, 0}},  // Влево
         {sf::Keyboard::D, {1, 0}},   // Вправо
@@ -23,11 +24,12 @@ Player::~Player()
 Player::Player()
 {
     health = 10;
+    maxHealth = 10;
     speed = PLAYER_SPEED;
 
     initAnimations();
-    
 
+    this->map = &Map::getInstance();
     elapsedTime = 0.0f;
     currentFrame = 0;
     previousState = IDLE; // Начальное состояние
@@ -39,12 +41,13 @@ Player::Player()
     sprite.setOrigin(playerBounds.width / 2.0f, playerBounds.height / 2.0f); // Устанавливаем точку, откуда будет рассчитываться положение спрайта
 
     const std::string playerBulletPath = R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Bullets\PopGunBullet.png)";
-    weapons.push_back(std::make_unique<Weapon>(playerBulletPath,PLAYER_BULLET_HEIGHT));
+    constexpr BulletOwner owner = PLAYER_BULLET;
+    weapons.push_back(std::make_unique<Weapon>(playerBulletPath,PLAYER_BULLET_HEIGHT,owner));
     currentWeapon = weapons[0].get();
 
 
     abilities.push_back(std::make_unique<RollAbility>(1.0f,PLAYER_SPEED));
-    abilities.push_back(std::make_unique<ShieldAbility>(3.0f,PLAYER_SPEED));
+    abilities.push_back(std::make_unique<ShieldAbility>(1.5f,PLAYER_SPEED));
     currentAbility = abilities[0].get();
 
     sprite.setScale(PLAYER_HEIGHT, PLAYER_HEIGHT);  // Увеличиваем спрайт в два раза
@@ -59,14 +62,15 @@ void Player::initAnimations() {
     constexpr int SHIELD_HEIGHT = 64;
     constexpr int SHIELD_GAP = 25;
 
-    loadAnimation(IDLE, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishStand.png)", STATES_FRAMES[0], FRAME_WIDTH, FRAME_HEIGHT, GAP);
-    loadAnimation(WALKING, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishWalk.png)", STATES_FRAMES[1], FRAME_WIDTH, FRAME_HEIGHT, GAP);
-    loadAnimation(HURT, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishDamage.png)", STATES_FRAMES[2], FRAME_WIDTH, FRAME_HEIGHT, GAP);
-    loadAnimation(ROLLING, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishRoll.png)", STATES_FRAMES[3], FRAME_WIDTH, FRAME_HEIGHT, GAP);
-    loadAnimation(SHIELD, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishShield.png)", STATES_FRAMES[4], SHIELD_WIDTH, SHIELD_HEIGHT, SHIELD_GAP);
+    loadAnimation(IDLE, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishStand.png)", STATES_FRAMES[IDLE], FRAME_WIDTH, FRAME_HEIGHT, GAP);
+    loadAnimation(WALKING, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishWalk.png)", STATES_FRAMES[WALKING], FRAME_WIDTH, FRAME_HEIGHT, GAP);
+    loadAnimation(HURT, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishDamage.png)", STATES_FRAMES[HURT], FRAME_WIDTH, FRAME_HEIGHT, GAP);
+    loadAnimation(ROLLING, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishRoll.png)", STATES_FRAMES[ROLLING], FRAME_WIDTH, FRAME_HEIGHT, GAP);
+    loadAnimation(DEAD, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishDead.png)", STATES_FRAMES[DEAD], FRAME_WIDTH, FRAME_HEIGHT, GAP);
+    loadAnimation(SHIELD, R"(C:\Users\brota\CLionProjects\NuclearProject\icons\Player\fishShield.png)", STATES_FRAMES[SHIELD], SHIELD_WIDTH, SHIELD_HEIGHT, SHIELD_GAP);
 }
 
-void Player::loadAnimation(const State state, const std::string& texturePath, const int frameCount, int frameWidth, int frameHeight, const int gap)
+void Player::loadAnimation(const State state, const std::string& texturePath, const int frameCount, const int frameWidth, const int frameHeight, const int gap)
 {
     Animation animation;
     sf::Image animIcon;
@@ -94,92 +98,114 @@ Player& Player::getInstance()
     return player;
 }
 
-void Player::smoothMove(const sf::Vector2f& targetPosition, const float deltaTime) {
-    constexpr float smoothingFactor = 4.0f;  // Чем выше, тем плавнее движение
-    const sf::Vector2f currentPos = sprite.getPosition();
-    const sf::Vector2f newPos = currentPos + (targetPosition - currentPos) * smoothingFactor * deltaTime;
-    sprite.setPosition(newPos);
+void Player::handleInput(Player& player, const sf::Vector2f& cursorPosition, const float deltaTime)
+{
+    if(state != DEAD)
+    {
+        processMovement();
+        processShooting(cursorPosition,deltaTime);
+        processAbilities(player, deltaTime);
+    }
 }
 
-void Player::handleInput(Player& player,const sf::Vector2f& cursorPosition,const float deltaTime)
-{
+void Player::processMovement() {
     sf::Vector2f direction(0.f, 0.f);
     bool isWalking = false;
 
-    for (const auto& [key, vec] : keyToDirection)
-    {
-        if (sf::Keyboard::isKeyPressed(key))
-        {
+    for (const auto& [key, vec] : keyToDirection) {
+        if (sf::Keyboard::isKeyPressed(key)) {
             direction += vec;
             isWalking = true;
         }
     }
 
-    // Проверяем движение и состояние одновременно
-    if (!isSpecialActive)
+    if (!isSpecialActive && state != HURT && state != DEAD)
     {
         state = isWalking ? WALKING : IDLE;
     }
+
 
     // Перемещаем игрока
     if (direction != sf::Vector2f(0.f, 0.f))
     {
         // Рассчитываем следующую позицию игрока
-        const sf::Vector2f nextPos = sprite.getPosition() + (speed * direction);
+        const sf::Vector2f offset = speed * direction;
+        const sf::Vector2f nextPos = sprite.getPosition() + offset;
         // Проверяем, нет ли стены на этой позиции
-        if (!map.isWallAtPosition(nextPos))
+        if (!map->isWallAtPosition(nextPos))
         {
             // Если стены нет, перемещаем игрока
-            sprite.move(speed * direction.x, speed * direction.y);
+            sprite.move(offset);
         }
     }
+}
 
-    // Обрабатываем стрельбу
+void Player::processShooting(const sf::Vector2f& cursorPosition,const float deltaTime) const
+{
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
     {
         const sf::Vector2f fireDirection = cursorPosition - sprite.getPosition();
-        currentWeapon->fire(sprite.getPosition(), fireDirection,signRotationValue);
+        currentWeapon->fire(sprite.getPosition(), fireDirection, signRotationValue);
     }
-
     // Обновляем позицию оружия
     sf::Vector2f weaponPos = sprite.getPosition();
     weaponPos.x -= 10.0f * signRotationValue;
     weaponPos.y += 15.0f;
     currentWeapon->update(weaponPos, cursorPosition, deltaTime, signRotationValue);
+}
 
-    // Обрабатываем способность
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-    {
+void Player::processAbilities(Player& player, const float deltaTime) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) && !abilitySwitching && !isSpecialActive) {
         switchAbility();
+        abilitySwitching = true;
+    } else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+        abilitySwitching = false;
     }
 
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
-    {
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
         currentAbility->activate(player);
     }
 
     currentAbility->update(player, deltaTime);
 }
 
+
 void Player::switchAbility()
 {
     currentAbilityIndex = (currentAbilityIndex + 1) % abilities.size();
+    currentAbility->setTimeSinceActivated(INT_MAX);
     currentAbility  = abilities[currentAbilityIndex].get();
 }
 
 void Player::update(const float deltaTime, const sf::Vector2f& cursorPosition)
 {
+    if(!active) return;
     elapsedTime += deltaTime;
 
+    // Если состояние "получение урона"
+    handleDamage(deltaTime);
+    animationUpdate(cursorPosition);
+}
+
+void Player::animationUpdate(const sf::Vector2f &cursorPosition)
+{
     // Оптимизация расчета направления взгляда
+    handleRotation(cursorPosition);
+
+    // Оптимизация смены состояний
+    handleState();
+}
+
+void Player::handleRotation(const sf::Vector2f& cursorPosition)
+{
     if (const sf::Vector2f& spritePosition = sprite.getPosition(); (cursorPosition.x < spritePosition.x && signRotationValue != 1) ||
                                                                    (cursorPosition.x >= spritePosition.x && signRotationValue != -1))
     {
         signRotationValue = cursorPosition.x < spritePosition.x ? 1 : -1;
-        const float scale = signRotationValue == 1 ? -PLAYER_HEIGHT : PLAYER_HEIGHT;
+        const float scale = signRotationValue >= 1 ? -PLAYER_HEIGHT : PLAYER_HEIGHT;
         sprite.setScale(scale, PLAYER_HEIGHT);
 
-        if (signRotationValue == 1)
+        if (signRotationValue >= 1)
         {
             currentWeapon->mirroredLeft();
         }
@@ -188,8 +214,28 @@ void Player::update(const float deltaTime, const sf::Vector2f& cursorPosition)
             currentWeapon->mirroredRight();
         }
     }
+}
+void Player::handleDamage(const float deltaTime)
+{
+    if (state == HURT)
+    {
+        damageAnimationTime -= deltaTime;
+        // Откидываем назад игрока
+        sf::Vector2f knockback = (signRotationValue == 1) ? sf::Vector2f(50.f, 0.f) : sf::Vector2f(-50.f, 0.f);
+        knockback *= deltaTime;
+        if(!map->isWallAtPosition(sprite.getPosition() + knockback))
+        {
+            sprite.move(knockback * deltaTime);
+        }
+        if(damageAnimationTime <= 0)
+        {
+            state = IDLE;
+        }
+    }
+}
 
-    // Оптимизация смены состояний
+void Player::handleState()
+{
     if (state != previousState)
     {
         currentFrame = 0;
@@ -203,20 +249,19 @@ void Player::update(const float deltaTime, const sf::Vector2f& cursorPosition)
         elapsedTime = 0.0f;
 
         // Получаем текущее состояние анимации
-        const auto&[texture, frames, frameCount] = animations[state];
-        sprite.setTextureRect(frames[currentFrame]);
+        sprite.setTextureRect(animations[state].frames[currentFrame]);
 
         // Обновляем кадр
         if (state == SHIELD)
         {
             // Если состояние "щит", то кадры проходят только вперед
-            if (currentFrame < frameCount - 1)
+            if (currentFrame < animations[state].frameCount - 1)
                 currentFrame++;
         }
         else
         {
             // Для остальных состояний кадры зацикливаются
-            currentFrame = (currentFrame + 1) % frameCount;
+            currentFrame = (currentFrame + 1) % animations[state].frameCount;
         }
 
         // Если требуется зеркалирование, изменить origin спрайта
@@ -225,13 +270,50 @@ void Player::update(const float deltaTime, const sf::Vector2f& cursorPosition)
             const sf::FloatRect& localBounds = sprite.getLocalBounds();
             sprite.setOrigin(localBounds.width / 2.0f,localBounds.height / 2.0f);
         }
+        if(state == DEAD && currentFrame == 0)
+        {
+            active = false;
+        }
     }
 }
 
+void Player::takeDamage(Bullet* bullet) {
+    if(state != ROLLING)
+    {
+        if(state == SHIELD)
+        {
+            bullet->reflect(PLAYER_BULLET);
+        }
+        else
+        {
+            health -= 1;
+            if(health <= 0)
+            {
+                state = DEAD;
+            }
+            else
+            {
+                state = HURT;  // Переключаем состояние на "получение урона"
+                currentFrame = 0;
+                elapsedTime = 0;
+                damageAnimationTime = DAMAGE_DURATION;
+            }
+            bullet->deactivate();
+        }
+    }
+}
+
+
 void Player::draw(sf::RenderWindow& window) const {
     window.draw(sprite);
-    currentWeapon->draw(window);
+    if(active)
+    {
+        currentWeapon->draw(window);
+    }
 }
+
+
+
 
 void Player::setHealth(const int hp)
 {
@@ -292,7 +374,21 @@ float Player::getScaleValue() const
 {
     return signRotationValue;
 }
-void Player::setMap(const Map &map)
+
+Weapon* Player::getWeapon() const
 {
-    this->map = map;
+    return currentWeapon;
+}
+
+sf::Sprite Player::getSprite() const
+{
+    return sprite;
+}
+bool Player::isAlive() const
+{
+    return health > 0;
+}
+int Player::getMaxHealth() const
+{
+    return maxHealth;
 }
