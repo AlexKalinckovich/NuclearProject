@@ -53,6 +53,15 @@ Player::Player()
     sprite.setScale(PLAYER_HEIGHT, PLAYER_HEIGHT);  // Увеличиваем спрайт в два раза
 }
 
+void Player::resetPlayer()
+{
+    state = IDLE;
+    active = true;
+    health = maxHealth;
+    isSpinning = false;
+    sprite.setRotation(0);
+}
+
 void Player::initAnimations() {
     constexpr int FRAME_WIDTH = 24;
     constexpr int FRAME_HEIGHT = 24;
@@ -89,6 +98,10 @@ void Player::loadAnimation(const State state, const std::string& texturePath, co
 
     animation.frameCount = frameCount;
     animations[state] = animation;
+}
+
+void Player::startSpinning() {
+    isSpinning = true;  // Флаг, что игрок начал вращаться
 }
 
 
@@ -181,7 +194,10 @@ void Player::update(const float deltaTime, const sf::Vector2f& cursorPosition)
 {
     if(!active) return;
     elapsedTime += deltaTime;
-
+    if(isSpinning)
+    {
+        sprite.rotate(360.0f * deltaTime);
+    }
     // Если состояние "получение урона"
     handleDamage(deltaTime);
     animationUpdate(cursorPosition);
@@ -189,6 +205,7 @@ void Player::update(const float deltaTime, const sf::Vector2f& cursorPosition)
 
 void Player::animationUpdate(const sf::Vector2f &cursorPosition)
 {
+
     // Оптимизация расчета направления взгляда
     handleRotation(cursorPosition);
 
@@ -290,6 +307,7 @@ void Player::takeDamage(Bullet* bullet) {
             if(health <= 0)
             {
                 state = DEAD;
+                health = 0;
             }
             else
             {

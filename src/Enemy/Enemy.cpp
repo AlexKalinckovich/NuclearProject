@@ -1,6 +1,7 @@
 #include "Enemy/Enemy.h"
 #include "Map.h";
 #include <cmath>
+#include <Game.h>
 #include <Player.h>
 #include <random>
 
@@ -9,6 +10,10 @@ constexpr float ENEMY_HEIGHT = 3.0f;
 constexpr float ENEMY_BULLET_HEIGHT = 2.5f;
 constexpr int STATES_FRAMES[3]{6,3,6};
 constexpr float DAMAGE_DURATION = 0.5f;
+
+int Enemy::score = 0;  // Инициализация переменной очков
+sf::Vector2f Enemy::lastEnemyPosition = {300,300};  // Инициализация переменной для позиции последнего врага
+
 // Конструктор Enemy
 Enemy::Enemy(const sf::Vector2f& position)
 {
@@ -53,6 +58,12 @@ void Enemy::takeDamage(Bullet* bullet)
     if(health <= 0)
     {
         state = ENEMY_DEAD;
+        lastEnemyPosition = sprite.getPosition();
+        if(previousState != state)
+        {
+            score++;
+            Game::IncreaseCount();
+        }
         deactivateBullets();
     }
     else

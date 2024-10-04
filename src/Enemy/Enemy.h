@@ -36,11 +36,18 @@ public:
     Weapon* getWeapon() const;
     sf::Sprite getSprite() const;
 
+    static int getScore() { return score; }  // Статический метод для получения очков
+    static sf::Vector2f getLastEnemyPosition() {return lastEnemyPosition;};  // Получить позицию последнего убитого врага
+    static void resetScore(){score = 0;}
+
 private:
     sf::Sprite sprite;
     std::unique_ptr<Weapon> weapon;
     std::array<enemyAnimation, 3> animations;
     sf::Vector2f velocity;
+
+    static int score;  // Статическая переменная для очков
+    static sf::Vector2f lastEnemyPosition;  // Статическая переменная для позиции последнего убитого врага
 
     unsigned currentFrame = 0;
     float elapsedTime = 0.0f;

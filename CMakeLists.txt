@@ -31,6 +31,7 @@ add_executable(MySFMLProject
         src/Thread/ThreadPool.cpp
         src/Thread/ThreadPool.cpp
         src/Game/Game.cpp
+        src/Portal/Portal.cpp
 )
 
 # Добавление include директорий
@@ -45,6 +46,8 @@ target_include_directories(MySFMLProject PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Map
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Enemy
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Thread
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Game
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Portal
 )
 
 # Линковка SFML библиотек

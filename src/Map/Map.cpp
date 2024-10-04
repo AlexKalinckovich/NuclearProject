@@ -24,6 +24,7 @@ Map::Map()
 }
 
 void Map::generate() {
+    generateLabyrinth(1,1);
     initialMapWithWalls(); // Заполняем карту стенами
     randomizeMap();            // Первичное случайное заполнение
     smoothMap();              // Несколько итераций сглаживания

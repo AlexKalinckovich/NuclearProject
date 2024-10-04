@@ -50,7 +50,7 @@ public:
     bool getSpecialActive() const;
 
     void setNormalBounds();
-
+    void resetPlayer();
     sf::Vector2f getPosition() const;
     void setPosition(const sf::Vector2f& position);
 
@@ -59,8 +59,12 @@ public:
     sf::Sprite getSprite() const;
     int getMaxHealth() const;
     bool isAlive() const;
+    void startSpinning();
 private:
     Player();
+
+
+
     ~Player();
 
 
@@ -68,6 +72,8 @@ private:
     Map* map;
     bool abilitySwitching = false;
     bool active = true;
+    bool isSpinning = false;
+
     Player(const Player&);
     Player& operator=(const Player&) const;
 
@@ -100,6 +106,9 @@ private:
 
     void changeAbility();
     void loadAnimation(State state, const std::string& texturePath, int frameCount, int frameWidth, int frameHeight, int gap);
+
+
+
     void initAnimations();
     void switchAbility();
 
